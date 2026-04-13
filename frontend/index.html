@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pacific Search Assistant</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f7fb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 60px auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-bottom: 20px;
+        }
+
+        input, select {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .doc {
+            background: #f1f3f6;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+
+        .ttft {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>🔍 Pacific Internal Search Assistant</h2>
+
+        <input id="query" placeholder="Ask something like 'onboarding setup tools'">
+
+        <select id="role">
+            <option value="intern">Intern</option>
+            <option value="engineer">Engineer</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <button onclick="search()">Search</button>
+        <p id="loading" style="display:none;">Searching...</p>
+
+        <div class="section">
+            <h3>Answer</h3>
+            <p id="answer"></p>
+        </div>
+
+        <div class="section">
+            <h3>Documents</h3>
+            <div id="docs"></div>
+        </div>
+
+        <div class="section">
+            <h3>TTFT</h3>
+            <p class="ttft" id="ttft"></p>
+        </div>
+    </div>
+
+    <script>
+        async function search() {
+            const query = document.getElementById("query").value;
+            const role = document.getElementById("role").value;
+
+            document.getElementById("loading").style.display = "block";
+
+            const response = await fetch("http://127.0.0.1:8000/ask", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ query, role })
+            });
+
+            const data = await response.json();
+
+            document.getElementById("loading").style.display = "none";
+
+            document.getElementById("answer").innerText = data.answer;
+            document.getElementById("ttft").innerText = data.ttft_ms + " ms";
+
+            // highlight keywords
+            let docsHTML = "";
+
+            if (data.documents.length === 0) {
+                docsHTML = `
+                    <div class="doc">
+                        No results found. Try keywords like onboarding, deployment, or security.
+                    </div>
+                `;
+            } else {
+                data.documents.forEach(doc => {
+                    docsHTML += `
+                        <div class="doc">
+                            <strong>${highlight(doc.title, query)}</strong><br>
+                            ${highlight(doc.content, query)}
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById("docs").innerHTML = docsHTML;
+        }
+    </script>
+</body>
+</html>
