@@ -27,3 +27,20 @@ This project is a lightweight internal knowledge search assistant that retrieves
 cd backend
 pip install -r requirements.txt
 uvicorn main:app --reload
+```
+Backend will run at:
+http://127.0.0.1:8000
+
+
+### 3. Open the frontend
+
+Open the file:
+```bash
+frontend/index.html
+```
+in your browser
+
+## Example Usage
+Query: onboarding tools
+
+Role: intern
